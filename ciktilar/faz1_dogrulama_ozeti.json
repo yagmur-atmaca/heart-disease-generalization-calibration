@@ -1,0 +1,59 @@
+{
+  "faz": "Uygulamalı Yapay Zekâ Faz 1",
+  "run_context": "Yerel paket Jupyter Notebook / Python, 2026-11-08",
+  "raw_counts": {
+    "Cleveland": 303,
+    "Statlog": 270,
+    "Hungarian": 294
+  },
+  "deduplicated_counts": {
+    "Cleveland": 303,
+    "Statlog": 270,
+    "Hungarian": 293
+  },
+  "class0": {
+    "Cleveland": 164,
+    "Statlog": 150,
+    "Hungarian": 187
+  },
+  "class1": {
+    "Cleveland": 139,
+    "Statlog": 120,
+    "Hungarian": 106
+  },
+  "missing_13_features": {
+    "Cleveland": 6,
+    "Statlog": 0,
+    "Hungarian": 778
+  },
+  "hungarian_missing_common10": 34,
+  "overlaps": {
+    "Cleveland_Statlog": 270,
+    "Cleveland_Hungarian": 0
+  },
+  "different_full_record_patterns": 596,
+  "outlier_flags": 20,
+  "distinct_outlier_rows": 19,
+  "preprocessing_example": {
+    "cleveland_train_full": [
+      242,
+      28
+    ],
+    "cleveland_test_full": [
+      61,
+      28
+    ],
+    "cleveland_train_common": [
+      242,
+      18
+    ],
+    "hungarian_transformed": [
+      293,
+      18
+    ]
+  },
+  "tests_local": "6/6 success; bundled ZIP includes executed notebook and test harness",
+  "model_training": "Not performed; phase 2",
+  "nested_cv": "Not performed; phase 2",
+  "medical_qualification": "Educational dataset analysis, not clinical validation"
+}
