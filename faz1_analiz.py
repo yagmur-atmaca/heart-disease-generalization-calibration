@@ -56,8 +56,8 @@ stats=pd.DataFrame(stats);missing=pd.DataFrame(missing);classes=pd.DataFrame(cla
 assert list(stats.Tekil)==[303,270,293] and list(stats.Eksik)==[6,0,778]
 assert int(data["Hungarian"][NUM+CAT].isna().sum().sum())==34
 stats.to_csv(OUT/"veri_ozeti.csv",index=False)
-missing.to_csv(OUT/"eksik_degerler.csv",index=False)
-classes.to_csv(OUT/"siniflar.csv",index=False)
+missing.to_csv(OUT/"eksik_hucreler.csv",index=False)
+classes.to_csv(OUT/"sinif_sayilari.csv",index=False)
 print(stats.to_string(index=False))
 
 # %% 3 — Tam kayıt örtüşmesi (hasta kimliği değildir)
@@ -69,7 +69,7 @@ overlap=[{"Kaynak":a,"Hedef":b,"Tam eşleşme":len(sets[a]&sets[b])}
          for a,b in [("Cleveland","Statlog"),("Cleveland","Hungarian"),("Statlog","Hungarian")]]
 assert overlap[0]["Tam eşleşme"]==270 and overlap[1]["Tam eşleşme"]==0
 assert len(set().union(*sets.values()))==596
-pd.DataFrame(overlap).to_csv(OUT/"tam_kayit_ortusmesi.csv",index=False)
+pd.DataFrame(overlap).to_csv(OUT/"kume_ortusmesi.csv",index=False)
 print(pd.DataFrame(overlap).to_string(index=False))
 print("866 toplam kaynak satırı; 596 farklı tam kayıt örüntüsü. Benzersiz hasta sayısı değildir.")
 
@@ -83,26 +83,26 @@ for a in NUM:
     flags[a]=(c[a]<lo)|(c[a]>hi)
     outlier.append({"Alan":a,"Q1":q1,"Medyan":c[a].median(),"Q3":q3,"IQR":iqr,"Alt":lo,"Üst":hi,"İşaretleme":int(flags[a].sum())})
 assert flags.to_numpy().sum()==20 and flags.any(axis=1).sum()==19
-pd.DataFrame(outlier).to_csv(OUT/"aykiri_deger.csv",index=False)
+pd.DataFrame(outlier).to_csv(OUT/"aykiri_ozet.csv",index=False)
 correlation=c[NUM].corr()
-correlation.to_csv(OUT/"korelasyon_pearson.csv")
+correlation.to_csv(OUT/"pearson_sayisal.csv")
 
 # %% 5 — Gerçek görseller
 sns.set_theme(style="whitegrid")
 fig,ax=plt.subplots(figsize=(8,4))
 sns.barplot(data=classes,x="Küme",y="Adet",hue="Sınıf",ax=ax)
 ax.set(title="Kaynağa göre ikili sınıf sayıları");fig.tight_layout()
-fig.savefig(FIG/"01_siniflar.png");plt.close(fig)
+fig.savefig(FIG/"01_sinif_dagilimi.png");plt.close(fig)
 fig,ax=plt.subplots(figsize=(8,5))
 sns.heatmap(missing.pivot(index="Alan",columns="Küme",values="Eksik"),
             annot=True,fmt="d",cmap="YlOrRd",ax=ax)
 ax.set(title="Ham 13 girdide eksik hücreler");fig.tight_layout()
-fig.savefig(FIG/"02_eksik.png");plt.close(fig)
+fig.savefig(FIG/"02_eksik_veri_isi_haritasi.png");plt.close(fig)
 fig,ax=plt.subplots(figsize=(8,4))
 for name,df in data.items():
     ax.hist(df.age,alpha=.45,label=name,bins=13)
 ax.set(title="Veri kümelerinde yaş dağılımı",xlabel="Yaş");ax.legend();fig.tight_layout()
-fig.savefig(FIG/"03_yas.png");plt.close(fig)
+fig.savefig(FIG/"03_yas_yogunlugu.png");plt.close(fig)
 fig,axs=plt.subplots(1,3,figsize=(10,4))
 for ax,col in zip(axs,["trestbps","chol","oldpeak"]):
     sns.boxplot(data=c,y=col,ax=ax)
@@ -111,12 +111,16 @@ fig.savefig(FIG/"04_boxplot.png");plt.close(fig)
 fig,ax=plt.subplots(figsize=(7,5))
 sns.heatmap(correlation,annot=True,vmin=-1,vmax=1,cmap="vlag",ax=ax)
 ax.set(title="Cleveland sürekli değişkenler Pearson r");fig.tight_layout()
-fig.savefig(FIG/"05_korelasyon.png");plt.close(fig)
+fig.savefig(FIG/"05_pearson_isiharitasi.png");plt.close(fig)
 fig,ax=plt.subplots(figsize=(7,3))
 ax.bar(["C-S","C-H","S-H"],[o["Tam eşleşme"] for o in overlap])
 ax.set(ylabel="Tam kayıt eşleşmesi",title="13 özellik ve hedef bazında örtüşme")
-fig.tight_layout();fig.savefig(FIG/"06_ortusme.png");plt.close(fig)
-print("Altı gerçek grafik grafikler/ klasörüne kaydedildi.")
+fig.tight_layout();fig.savefig(FIG/"06_kayit_ortusmesi.png");plt.close(fig)
+fig,ax=plt.subplots(figsize=(7,4))
+sns.countplot(data=c,x="cp",hue="hedef",ax=ax)
+ax.set(xlabel="Göğüs ağrısı türü",ylabel="Kayıt sayısı",title="Cleveland: göğüs ağrısı ve etiket")
+fig.tight_layout();fig.savefig(FIG/"07_gogus_agrisi.png");plt.close(fig)
+print("Yedi gerçek grafik grafikler/ klasörüne kaydedildi.")
 
 # %% 6 — Sadece eğitim katında fit; holdout ve Hungarian'da transform
 def preprocessor(categorical):
@@ -146,5 +150,5 @@ summary={"ham_satir_toplami":866,"farkli_tam_kayit":596,"hungarian_eksik":778,
          "model_egitimi":"Faz 2 - uygulanmadı",
          "nested_cv":"Faz 2 - uygulanmadı",
          "Brier_skora_ayrisimi":"Reliability - Resolution + Uncertainty"}
-(OUT/"kontrol_ozeti.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+(OUT/"faz1_dogrulama_ozeti.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
 print("Faz 1 tamamlandı: EDA ve ön işleme. Model başarısı üretilmedi.")
