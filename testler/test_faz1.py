@@ -6,7 +6,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 class Faz1Kontrol(unittest.TestCase):
     def test_dogrulama_ozeti(self):
-        p=ROOT/'ciktilar'/'kontrol_ozeti.json'
+        p=ROOT/'ciktilar'/'faz1_dogrulama_ozeti.json'
         self.assertTrue(p.exists(), 'Önce python faz1_analiz.py çalıştırın')
         d=json.loads(p.read_text())
         self.assertEqual(d['farkli_tam_kayit'],596)
